@@ -12,97 +12,25 @@
 <body>
 <header><div class="wrap"><nav><a class="brand" href="index.html">Tinashe Chingwaru</a><div class="links"><a href="index.html">Home</a><a href="projects.html" class="on" aria-current="page">Projects</a><a href="background.html">Background</a><a href="contact.html">Contact</a></div></nav></div></header>
 <main>
-<div class="wrap page-head"><div class="mono">Projects</div><h1>Projects</h1><p>Commercial work across firmware, hardware, software and production test.</p></div>
+<div class="wrap page-head"><div class="mono">Projects</div><h1>Projects</h1><p>Commercial engineering work.</p></div>
 <section><div class="wrap">
     
     <div class="grid">
 
       <article class="card proj">
         <div class="mono">Software · C#/.NET</div>
-        <h3>Fleet management system for networked safes</h3>
-        <p>Turned a single-user diagnostic tool into a multi-user server/client system, roughly doubling the codebase.</p>
+        <h3>Field firmware update for IP intercom nodes</h3>
+        <p>Added firmware update, per-input reporting and codec selection to an existing Windows configuration tool for IP intercom nodes.</p>
         <ul>
-          <li>Server/client architecture around a shared MySQL database, with a server heartbeat that clients watch.</li>
-          <li>Thread-safe UDP layer, with database writes moved to a queue and worker thread.</li>
-          <li>Versioned schema migrations, role-based access, password hashing and encryption, event reporting.</li>
+          <li>Integrated the production firmware loader, so one tool updates four device variants on two processor families, node by node, and lists any node that fails.</li>
+          <li>Worked out where new settings fit in an existing UDP protocol, using an unused data word and spare bits, and agreed the layout with the firmware developer.</li>
+          <li>Added file-name checks per device variant as a safety layer, and wrote the illustrated user manual for the update procedure.</li>
         </ul>
-        <div class="tags"><span>C#</span><span>MySQL</span><span>UDP</span><span>Multithreading</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Firmware · STM32</div>
-        <h3>Door controller firmware</h3>
-        <p>Responsible for the firmware of a multi-mode door controller that is also driven by a site PLC.</p>
-        <ul>
-          <li>Designed a new pneumatic door type with pressure-release valves, carried through firmware, mobile app and PC software.</li>
-          <li>Found a race condition between two card readers by rebuilding the setup on the bench.</li>
-          <li>Kept fail-safe, override and obstruction behaviour intact through every release.</li>
-        </ul>
-        <div class="tags"><span>C</span><span>FreeRTOS</span><span>DeviceNet</span><span>Wiegand</span><span>BLE</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Hardware · PCB design</div>
-        <h3>Isolated output add-on board</h3>
-        <p>A plug-in board that adds two switched outputs and an extra input to an IP intercom node.</p>
-        <ul>
-          <li>Optocoupler-isolated MOSFET outputs, each with a resettable fuse.</li>
-          <li>Selected an isolated DC/DC converter so site wiring faults cannot reach the host's logic.</li>
-          <li>Passed formal engineering review and went to production, with an installer wiring guide.</li>
-        </ul>
-        <div class="tags"><span>Altium Designer</span><span>Isolation</span><span>DC/DC</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Test · Production</div>
-        <h3>Automated production test</h3>
-        <p>A guided end-of-line test that runs from a PC against each unit over Ethernet.</p>
-        <ul>
-          <li>Fixed stages covering reader, keypad, doors, lock, Bluetooth, siren, sensors, alarm I/O and memory.</li>
-          <li>Drives outputs or prompts the operator, then waits for the matching input, with timeouts and retries.</li>
-          <li>Saves a test record for every unit.</li>
-        </ul>
-        <div class="tags"><span>C#</span><span>Test design</span><span>Traceability</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Hardware · Root cause</div>
-        <h3>Ethernet PHY failure investigation</h3>
-        <p>Took over a batch failure that had continued after a change of component supplier.</p>
-        <ul>
-          <li>Measurement sequence that rules out supply, clock, reset, strapping and line-side causes one by one.</li>
-          <li>Batch correlation to separate a component cause from field damage.</li>
-          <li>Recommended lot traceability, incoming sample tests and a link test in production.</li>
-        </ul>
-        <div class="tags"><span>Ethernet</span><span>Failure analysis</span><span>SMD rework</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Quality · Supplier</div>
-        <h3>Test jig recovery</h3>
-        <p>About 2 in 5 units were failing on the production test jig.</p>
-        <ul>
-          <li>Traced the cause to the jig's own unlabelled wiring, then rewired and labelled it against the schematics.</li>
-          <li>The failures left were real soldering defects on incoming boards.</li>
-          <li>Reported them with evidence, and the supplier's quality improved.</li>
-        </ul>
-        <div class="tags"><span>QA</span><span>Test equipment</span></div>
-      </article>
-
-      <article class="card proj">
-        <div class="mono">Software · Migration</div>
-        <h3>Purchasing and stock system</h3>
-        <p>Rebuilt a large Excel/VBA workbook as a layered C# application.</p>
-        <ul>
-          <li>Extracted the business rules from about 90 sheets and their macros.</li>
-          <li>Added a virtual stock calculation to prevent double ordering.</li>
-          <li>Verified by testing the application against the original workbook.</li>
-        </ul>
-        <div class="tags"><span>C#</span><span>SQL</span><span>VBA</span></div>
+        <div class="tags"><span>C#</span><span>UDP</span><span>Firmware update</span><span>Technical writing</span></div>
       </article>
 
     </div>
-    <p class="note">These are commercial projects, so source code is not public, and client, site and product names are left out. I'm happy to talk through the engineering.</p>
+    <p class="note">This is a commercial project, so source code is not public, and client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
 </main>
 <footer><div class="wrap">© 2026 Tinashe Chingwaru · Cape Town, South Africa</div></footer>
