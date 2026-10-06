@@ -131,6 +131,25 @@
         <div class="tags"><span>Root cause analysis</span><span>Ethernet PHY</span><span>KSZ8863</span><span>STM32F4 / F7</span><span>Oscilloscope</span><span>SMD rework</span><span>Schematic reading</span><span>Test jig</span><span>Loopback testing</span><span>Wiegand</span><span>QA</span></div>
       </article>
 
+    <article class="card proj">
+        <div class="mono">Firmware · STM32 · Safety-related</div>
+        <h3>Door controller firmware</h3>
+        <p>Engineer responsible for the firmware of a two-door controller used in secure facilities. One image on an STM32F4 under FreeRTOS drives 17 door types, from swing doors and turnstiles to pneumatic cell doors, and reports to a control room over Ethernet (LwIP, UDP) and to a site PLC over DeviceNet. Around ten releases over 20 months.</p>
+        <ul>
+          <li><strong>New door type, designed end to end.</strong> A pneumatic passage door needing pressure release at both ends of travel. The board had no spare outputs, so I reassigned the second door's outputs to two release valves and limited that type to one door per controller. Sequence: unlock valve on, wait for the lock bar to report unlocked, drive the open or close valve, stop on the optical end sensor or a travel timeout, allow about 1 s for the lock bar to drop, then release pressure for 2 s. Added to the firmware, the Bluetooth commissioning app and the PC configuration software.</li>
+          <li><strong>Lock-up in my own sequence, found in the field.</strong> The first version sequenced the release with three state flags inside the branch that only runs when the door is idle. A movement ending while a release was still in progress left the flags in a combination that never restarted. I moved the logic to run every control cycle and reduced it to two countdown timers, which always run to zero and so always recover.</li>
+          <li><strong>Six-year-old race condition between two card readers.</strong> Each Wiegand reader sets a flag, and the control code acts only on a flag's rising edge. When both readers fired in the same cycle, one was served and cleared while the other stayed set, so it never produced another edge and that reader went dead. The fault only appeared on site, so I rebuilt a two-reader turnstile on the bench, ran it until the fault reproduced, fixed the arbitration to clear both flags, and verified on the same rig.</li>
+          <li><strong>PLC integration over DeviceNet.</strong> Corrected how lock status is packed into the polled and change-of-state messages, with a stored setting to report either the lock sensor alone or the combined locked and unlocked result, depending on the site. Fixed the new door type's secure status not reaching the PLC by restricting the general sliding-door status logic to the door types it applies to.</li>
+          <li><strong>Release testing against the site's network tool.</strong> Reproduced a site discovery problem by running the PLC vendor's network software on a virtual machine, then used it as a connectivity test for every build. The test result decided between two candidate builds of one release.</li>
+          <li><strong>Defensive start-up.</strong> Settings read from flash are now validated: blank or zero values for IP address, subnet mask, device name and door timings fall back to known defaults, so a controller with corrupt settings starts in a known state and stays reachable.</li>
+          <li><strong>Settings paths separated.</strong> The mobile app and the PC software send settings in different layouts but shared one handler, which corrupted timeout values. Split into one parser per source with a common routine that writes to flash.</li>
+          <li><strong>Field constraint driving design.</strong> A client needed a 3 s turnstile output for a magnetic lock. I first made it selectable by DIP switch, then reversed the default the next day when it emerged that installed units could not practically be opened, so a network firmware update replaced a visit to every unit.</li>
+          <li><strong>Safety behaviour preserved through every release:</strong> manual override inputs, obstruction detection from door speed, travel timeouts and a cushion zone, and cancelling movement when the control-room link is lost.</li>
+        </ul>
+        <div class="tags"><span>C</span><span>STM32F4</span><span>FreeRTOS</span><span>LwIP</span><span>DeviceNet</span><span>Wiegand</span><span>BLE</span><span>Pneumatic control</span><span>Root cause analysis</span></div>
+      </article>
+        
+
     </div>
     <p class="note">This is a commercial project, so source code is not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
