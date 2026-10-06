@@ -70,6 +70,67 @@
         <div class="tags"><span>C#</span><span>.NET Framework</span><span>WinForms</span><span>UDP</span><span>SIP / VoIP</span><span>RTP</span><span>G.711 / G.722</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
       </article>
 
+    <article class="card proj">
+        <div class="mono">Hardware · Failure analysis · QA · to Feb 2024</div>
+        <h3>Ethernet PHY failure investigation, board repair and QA</h3>
+        <p>After the software project, I moved to the hardware of the same product family: an IP intercom node built around an STM32F7 and a two-door access control board built around an STM32F407 and a KSZ8863 three-port Ethernet switch. Both boards are installed in high-security sites and connect to long runs of external supply, network, speaker, reader and lock wiring. I did component-level fault-finding and repair on production and field-return units, found the root cause of an Ethernet failure affecting more than 300 boards, repaired the production test jig, and later took on quality assurance sign-off.</p>
+
+        <h4>Ethernet PHY failure investigation</h4>
+        <ul>
+          <li>More than 300 access control boards could not be discovered over UDP, both on the production line and in the field.</li>
+          <li>Affected boards still responded over Bluetooth. That told me the microcontroller, its firmware and its supply were working, so I confined the search to the Ethernet path.</li>
+          <li>Boards from earlier builds of the same design worked correctly, which gave me a known-good reference. I compared a failing board with a good board, circuit by circuit, in a fixed order.</li>
+          <li>I checked the 3.3 V digital and analogue rails and the 1.8 V rail at the device pins after the ferrite beads, the 25 MHz crystal and the clock outputs to the controller, the reset release and strap pin levels against the datasheet, and the transmit bias resistor and voltage.</li>
+          <li>On the line side, I checked continuity and resistance through the magnetics, termination networks and isolation capacitors, then ran a link and data-transfer test on both ports against a known-good partner.</li>
+          <li>The surrounding circuitry matched the schematic and the good board. The only difference was the switch IC itself, which ran hot whenever the board was connected to a network.</li>
+          <li>The devices on the failing boards carried different package markings from those on the good boards. They were counterfeit parts with a lower temperature rating than the specified industrial-grade KSZ8863MLLI, which the supplier admitted when it was raised.</li>
+          <li>I reported the finding to my supervisor, procurement and the workshop manager. The company changed supplier and the failures stopped.</li>
+        </ul>
+
+        <h4>Rework</h4>
+        <ul>
+          <li>I reworked about 50 boards myself. I removed the 48-pin fine-pitch device with hot air, cleaned the pads, fitted a genuine part and inspected the joints, then repeated the electrical checks and the link test on both ports.</li>
+          <li>I showed the workshop staff the rework method so that they could take over the remaining boards, and I checked their reworked boards afterwards.</li>
+        </ul>
+
+        <h4>Component-level fault-finding and repair</h4>
+        <ul>
+          <li>I studied the released schematics first, then followed the same sequence on every unit: inspect, form a hypothesis from the circuit, confirm it by measurement, repair, and test again. I did not replace parts by substitution.</li>
+          <li>On the supply input and 5 V buck regulator, I found high-resistance PTC fuses, TVS diodes that had failed short, damaged surge devices and out-of-tolerance parts in the timing and feedback networks. I confirmed each repair from the switching-node waveform on the oscilloscope and a step-load test of the rails.</li>
+          <li>On the speaker amplifier outputs, I found failed amplifier ICs, series resistors, coupling capacitors and open ferrite beads. I confirmed the repair by measuring output swing and DC offset. An open bead usually pointed to an earlier short on the site wiring, so I reported it for the installation to be checked.</li>
+          <li>On the line inputs, degraded coupling capacitors had shifted the bias point. I checked the DC bias against the calculated mid-rail level and spot-checked the frequency response at the filter corner frequencies of about 4.5 Hz and 7.2 kHz.</li>
+          <li>I traced intermittent link and power faults to dry or cracked solder joints and fractured pads, by monitoring the link or the rail while flexing the connector before and after rework.</li>
+          <li>On the access control board, I repaired the supply input and converters, the six opto-isolated lock-drive outputs, the two relay outputs, and the door-contact, exit-button and Wiegand reader inputs. I used the per-channel indicator LEDs and isolated grounds to separate logic-side faults from driver, MOSFET and load faults.</li>
+          <li>A design note on the power schematic records that a short on the 12 V reader output pulls down the 5 V and 3.3 V rails. A board that reset when a reader was connected therefore led me to the reader supply and boost stage, not the controller.</li>
+          <li>After each repair, I reprogrammed the unit, applied the default configuration, and confirmed that the firmware version and DIP switch settings matched the hardware build. Intercom nodes then went through a full call test covering call set-up, audio in both directions and clear-down.</li>
+        </ul>
+
+        <h4>Production test jig</h4>
+        <ul>
+          <li>I did the final functional test of each unit on an in-house test jig. It tested the Ethernet interface, the field inputs, the relay outputs and the lock-drive outputs.</li>
+          <li>The jig used a loopback arrangement. The unit's outputs switched relays inside the jig, and the relay contacts fed the unit's inputs, so each output was verified by reading the new state back on an input. A biometric reader in the jig exercised both Wiegand reader ports, A and B.</li>
+          <li>About two in five units were failing. The failures were intermittent, and units that had already passed sometimes failed on retest with no change to the unit. A defect in the product does not normally behave that way, so I treated the jig as the suspect and examined it before rejecting more units.</li>
+          <li>I checked the jig wiring for continuity with a multimeter and compared it with the existing wiring diagram. The wiring as built did not match the diagram, and none of it was labelled.</li>
+          <li>I then probed the jig's signals with an oscilloscope while a unit was under test. The interface board underneath the jig had an intermittent short that pulled a signal line low at random, so the signal was lost partway through a test and a good unit was reported as failed.</li>
+          <li>I also found loose connectors in the jig, which added further intermittent contact faults.</li>
+          <li>I rewired the jig to match the diagram and labelled every wire. I also replaced the pogo-pin contacts with plug-in connectors, which gave a positive, repeatable connection to the unit under test.</li>
+          <li>After the repair, false failures dropped to zero. Every failure the jig reported from then on was a real fault on the board being tested.</li>
+        </ul>
+
+        <h4>Quality assurance</h4>
+        <ul>
+          <li>My supervisor asked me to take on QA spot checks for these and other products. I had the authority to sign a unit out of the workshop or send it back for rework.</li>
+        </ul>
+
+        <h4>What I took from it</h4>
+        <ul>
+          <li>A matching part number does not prove that a part is genuine. Only the package markings, the temperature grade and the behaviour on the board showed the difference.</li>
+          <li>From this work, I identified measures to prevent a repeat: inspecting each newly sourced lot of the switch IC, recording date and lot codes at production for traceability, and adding a device read-back and a two-port link test to the production test.</li>
+        </ul>
+
+        <div class="tags"><span>Root cause analysis</span><span>Ethernet PHY</span><span>KSZ8863</span><span>STM32F4 / F7</span><span>Oscilloscope</span><span>SMD rework</span><span>Schematic reading</span><span>Test jig</span><span>Loopback testing</span><span>Wiegand</span><span>QA</span></div>
+      </article>
+
     </div>
     <p class="note">This is a commercial project, so source code is not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
