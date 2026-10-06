@@ -18,40 +18,56 @@
     <div class="grid">
 
       <article class="card proj">
-        <div class="mono">Software · C#/.NET · Jun–Dec 2023</div>
+        <div class="mono">Software · C#/.NET Framework · Jun–Dec 2023</div>
         <h3>Field firmware update for IP intercom nodes</h3>
-        <p>Extended a legacy Windows configuration tool for SIP/VoIP intercom nodes installed in high-security sites, where site visits are costly and restricted, so the client's own staff update live devices over the network. I added firmware update, per-input reporting and codec selection, fixed three existing faults and wrote the user manual.</p>
+        <p>As a junior embedded software engineer, I extended a legacy WinForms configuration and maintenance tool for SIP/VoIP intercom nodes deployed in high-security sites. The tool discovers nodes over UDP, reads and writes their settings, and updates their firmware. Site visits are costly and access is restricted, so the client's own staff flash live devices over Ethernet. The update path therefore had to send the correct image to the correct hardware and report every node that failed.</p>
+        <p>I inherited a code base dating from 2017 or earlier and had no prior C# experience. I delivered firmware update, per-input change-of-state reporting and codec selection. I also corrected three existing faults and wrote the user manual.</p>
 
         <h4>Firmware update</h4>
         <ul>
-          <li>Reused the production firmware loader instead of extending a separate UDP download, so field updates and factory programming share one proven method across four device variants on two processor families (STM32F7 and dsPIC33).</li>
-          <li>Classified each discovered node by its reported hardware version and node type, then updated nodes one at a time, because some client networks had switches without multicast support.</li>
-          <li>Replaced my first batch-file design with one process per node, so every node returns its own result and the tool lists exactly which nodes failed.</li>
-          <li>Added file-name checks per device variant and a confirmation step as a second safety layer in front of the firmware's own protection.</li>
-          <li>Tested on all four variants and on runs of up to 10 nodes, checking audio, settings and functions after each update.</li>
+          <li>I replaced the tool's built-in UDP download, which had been written only for the dsPIC33 nodes, with the command-line loader already used in production programming. Field updates and factory programming now share one proven method.</li>
+          <li>I added support for four device variants on two processor families. There are two node types, each with an older dsPIC33 hardware revision and a newer STM32F7 revision, and each variant has its own Intel HEX image.</li>
+          <li>I sorted the selected nodes into four lists using the hardware version and node type that each node reports in its discovery response, so the operator never has to identify hardware by hand.</li>
+          <li>For each node, I started one loader process and passed it the local IP address, target IP address, HEX file, processor family and device type as arguments. I waited for the process to exit and treated a non-zero exit code as a failure. The tool lists the failed nodes by IP address at the end of the run.</li>
+          <li>My first version, in July 2023, generated a single batch file covering every node. I replaced it in September 2023 with the per-node process model, because a batch run could not give me a result for each node.</li>
+          <li>I updated the nodes one at a time by unicast address, because some client sites had switches that did not support multicast.</li>
+          <li>I wrote a firmware selection form with one file picker per variant. Each dialog filters on that variant's file-name pattern, and the code rejects a name that does not match. This is a second layer in front of the firmware's own image validation. A confirmation dialog names the file before anything is sent.</li>
+          <li>I stored the loader path and the four firmware selections as .NET user settings, so they survive a restart.</li>
         </ul>
 
         <h4>Protocol extension</h4>
         <ul>
-          <li>The only protocol documentation was seven years out of date, so I compared it with the existing code to map which of the 20 sixteen-bit data words per packet were in use and which were free.</li>
-          <li>Packed six per-input reporting flags into a byte that previously held only 0 or 1, keeping bit 0 as the overall enable so older values keep their meaning.</li>
-          <li>Proposed codec selection myself after noticing mismatched codecs were degrading audio in the field. Implemented G.711 µ-law / G.722 switching in an unused data word, using the standard RTP payload type numbers.</li>
-          <li>Agreed the packet layout with the firmware developer before either of us changed code.</li>
+          <li>The proprietary protocol uses a fixed-layout UDP datagram. It carries two magic words, a sequence number, a return port, a packet count, a 16-bit command word and twenty 16-bit data words. The only specification was a spreadsheet seven years out of date, which described four inputs and had no codec field.</li>
+          <li>I compared that specification with the existing C# source to find which data words and bits were in use and which were free. I then placed the new settings in spare space in existing commands instead of adding new command codes.</li>
+          <li>For per-input reporting, the settings command carried one byte that had only ever held 0 or 1. I kept bit 0 as the global enable and used bits 1 to 6 as a mask for inputs 0 to 5, so the old value keeps its meaning. I packed the byte on write and decoded it in both code paths that parse the node's settings response.</li>
+          <li>I proposed codec selection after noticing that nodes in the field ran different codecs and that a mismatch degraded the audio. I used a data word in the audio settings packet that had always been sent as zero. The low byte holds the codec and the high byte holds the update flag, following the protocol's existing keep-or-update convention.</li>
+          <li>The codec value is the standard RTP payload type: 0 for PCMU (G.711 µ-law) and 9 for G.722. The tool also displays the value that the node reports back.</li>
+          <li>I agreed the bit and word positions with the engineer who maintained the node firmware before either of us changed any code. He made the matching firmware changes and updated the specification.</li>
         </ul>
 
-        <h4>Debugging and documentation</h4>
+        <h4>Faults found and corrected</h4>
         <ul>
-          <li>Captured the tool's packets with Wireshark, compared them with the protocol document and found the set-MAC-address command was sending the wrong sub-command. Verified the fix by power-cycling a node and confirming the address persisted.</li>
-          <li>Fixed input trigger polarity (high-level triggers could not be configured) and a copy-paste fault where one input read another input's timing value, and added read-back of those settings from the node.</li>
-          <li>Wrote a seven-page user manual with 14 annotated screenshots for the client staff who run the updates.</li>
+          <li>I captured the tool's datagrams in Wireshark, compared them field by field with the specification, and found that the set-MAC-address command was sending the wrong sub-command. After correcting it, I changed a node's MAC address, power-cycled the node and confirmed that the new address had been retained.</li>
+          <li>The tool sent 0 for both trigger-high and trigger-low on two inputs, so an active-high trigger could not be configured. I corrected the encoding and added read-back of the function and trigger settings from the node.</li>
+          <li>The trigger time for one input was being read from another input's text box. I traced the fault from incorrect behaviour on a node back to the form code and corrected it.</li>
         </ul>
 
-        <h4>What I would do differently</h4>
+        <h4>Testing and documentation</h4>
         <ul>
-          <li>Call the loader's library directly instead of launching it as a separate process, run updates off the UI thread, and log failure detail and retry failed nodes.</li>
+          <li>I tested against real hardware on a bench test jig. I ran firmware updates on all four variants and on up to 10 nodes in a single run. After each update, I checked the audio quality, the stored configuration and the node's functions.</li>
+          <li>I wrote a seven-page user manual with 14 annotated screenshots for the client staff who run the updates. It covers loader and firmware selection, how to tell old hardware from new hardware for each device, and how to read the result dialog.</li>
         </ul>
 
-        <div class="tags"><span>C#</span><span>.NET Framework</span><span>UDP</span><span>RTP</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
+        <h4>Limitations and what I would change</h4>
+        <ul>
+          <li>The update loop ran on the UI thread, so the main window was blocked during a run. I would move it to a background task with progress reporting and cancellation.</li>
+          <li>I read the loader's standard output to the end before reading standard error, which can deadlock if the child process fills the error pipe. I would read both streams asynchronously.</li>
+          <li>The tool captured the loader's output but did not show or log it, so the failure dialog gave only the IP address. I would log the output for each node and add a retry for failed nodes.</li>
+          <li>Validation was by file name only, so a renamed file would pass my check, and a node with an unrecognised hardware version fell into a default list. I would validate the image itself and reject unknown hardware explicitly.</li>
+          <li>With more C# experience, I would call the loader's library (DLL) directly instead of starting it as a separate process. That would give the tool direct access to progress and error information and would remove most of the issues above.</li>
+        </ul>
+
+        <div class="tags"><span>C#</span><span>.NET Framework</span><span>WinForms</span><span>UDP</span><span>SIP / VoIP</span><span>RTP</span><span>G.711 / G.722</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
       </article>
 
     </div>
