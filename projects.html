@@ -6,6 +6,7 @@
 <title>Projects | Tinashe Chingwaru</title>
 <meta name="description" content="Portfolio of Tinashe Chingwaru, electronic engineer working across embedded firmware, hardware design and C#/.NET systems.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,7 +15,7 @@
 <main>
 <div class="wrap page-head"><div class="mono">Projects</div><h1>Projects</h1><p>Commercial engineering work.</p></div>
 <section><div class="wrap">
-    
+
     <div class="grid" style="display:grid; grid-template-columns:1fr;">
 
       <article class="card proj">
@@ -70,7 +71,7 @@
         <div class="tags"><span>C#</span><span>.NET Framework</span><span>WinForms</span><span>UDP</span><span>SIP / VoIP</span><span>RTP</span><span>G.711 / G.722</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
       </article>
 
-    <article class="card proj">
+      <article class="card proj">
         <div class="mono">Hardware · Failure analysis · QA · to Feb 2024</div>
         <h3>Ethernet PHY failure investigation, board repair and QA</h3>
         <p>After the software project, I moved to the hardware of the same product family: an IP intercom node built around an STM32F7 and a two-door access control board built around an STM32F407 and a KSZ8863 three-port Ethernet switch. Both boards are installed in high-security sites and connect to long runs of external supply, network, speaker, reader and lock wiring. I did component-level fault-finding and repair on production and field-return units, found the root cause of an Ethernet failure affecting more than 300 boards, repaired the production test jig, and later took on quality assurance sign-off.</p>
@@ -184,7 +185,6 @@
         <div class="tags"><span>Embedded firmware</span><span>STM32F4</span><span>FreeRTOS</span><span>LwIP</span><span>DeviceNet</span><span>PLC integration</span><span>Wiegand</span><span>Bluetooth</span><span>State machines</span><span>Root cause analysis</span></div>
       </article>
 
-
       <article class="card proj">
         <div class="mono">Software · Client–server · MySQL · Alarm signalling · [dates]</div>
         <h3>Management and alarm software for networked electronic safes</h3>
@@ -195,169 +195,4 @@
           <li>The inherited tool ran on one PC for one user and kept its device list in a local file. The client needed several control-room operators working on the same safes, an event history that outlives any one PC and control over who may change what.</li>
           <li>I agreed the architecture with my supervisor and then built it. The server runs on a remote machine and the clients run in the control room, with no direct route between them, so I made a MySQL database the link between the two.</li>
           <li>The server polls the safes, records their status, writes events to the log and publishes shared settings such as the safe list and firmware files. Each client synchronises its safe list with the database on start-up.</li>
-          <li>A client cannot ask the server directly whether it is running, so the server writes a heartbeat to a status table while it polls. Each client reads the newest entry and treats the server as down when the entry is stale, and shows this on a green, orange or red status bar. Operators therefore know when the picture on screen is out of date.</li>
-          <li>The server refuses to start if another instance is already running, so that two servers cannot poll the same safes.</li>
-          <li>I put all database operations on a thread-safe queue served by a worker thread, so that neither the user interface nor the UDP communication waits for the database. I added locks on the lists that the UDP layer shares between threads.</li>
-          <li>I implemented role-based access control with three roles: administrator, manager and user. Ordinary users can view and operate a safe, and only a manager can remove a safe or manage logins.</li>
-        </ul>
-
-        <h4>Features for operators</h4>
-        <ul>
-          <li>I built the safe view window that the client had asked for, from which operators see each safe and operate it remotely.</li>
-          <li>I added an alarm column on the main window that flags conditions such as a disabled safe, a disabled interlock or a clock out of sync, and a window that shows how many messages each safe is sending to the alarm link per minute.</li>
-          <li>I blocked other packets during a firmware update, and added migration of safe users when upgrading across a change in the firmware's memory layout.</li>
-          <li>I fixed list flicker and unwanted re-selection caused by automatic status packets, and added CSV import, time synchronisation and input length limits.</li>
-          <li>Older safe firmware ignored a settings packet of the wrong length. I padded the packet to the expected length in the software, which restored the function for safes already in the field without a firmware change.</li>
-        </ul>
-
-        <h4>Event log reports</h4>
-        <ul>
-          <li>The server records each safe's events in the database: the time, shop number, user number, message, door number and the safe's IP address. The client's manager needed to review this history after an incident, to see who opened which door, without having access to the database itself.</li>
-          <li>I added a report window to the client application. The operator chooses a date range and requests the events of one selected safe or of all safes.</li>
-          <li>The software runs a parameterised SQL query against the event table for that range, loads the result into a report template and exports it as a PDF. I used the open-source FastReport library for the template and the export, instead of writing a PDF generator myself.</li>
-          <li>Each report is saved with a timestamp in its file name, in a folder for that safe or a separate folder for all safes, so an earlier report is never overwritten. The single-safe button is disabled until a safe is selected, and the operator must confirm before a report is generated.</li>
-          <li>I chose PDF over a spreadsheet export because the report may be relied on after an incident and should not be easy to alter. A PDF is not tamper-proof, so the database remains the authoritative record, and a report can be generated again from it for comparison.</li>
-        </ul>
-
-        <h4>Guided production test page</h4>
-        <ul>
-          <li>I noticed that technicians were taking a long time to test each safe by hand from a paper sign-off sheet. Nobody had asked for a tool, so I proposed and built one into the software.</li>
-          <li>The page takes the technician through eleven stages in a fixed order.</li>
-          <li>At each stage, the page either drives the safe itself or prompts the technician, then waits for the safe to report the matching result and marks the stage OK or FAULTY. It checks for conditions that would spoil a result, such as a door that is already open and allows a retry.</li>
-          <li>I used a colleague's existing manual test procedure as the specification. The page saves a timestamped report for each safe, which replaces the hand-written sheet.</li>
-          <li>I timed myself testing one safe each way. The manual sheet took about 20 minutes and the test page took less than 5 minutes.</li>
-        </ul>
-
-        <h4>Alarm link to the monitoring software</h4>
-        <ul>
-          <li>The alarm link had been written for intercom nodes. I extended it to the safes, so that their Contact ID events are forwarded in the required format, and added a configuration file that maps each access card to a user in the monitoring software.</li>
-          <li>After release, safe events were not handled correctly. I traced this to the event qualifier, which the safe already sent in the requiered form while the program expected the unconverted form, so its case statement never matched. I corrected the handling.</li>
-          <li>A safe that stops communicating cannot report an alarm. I added connection monitoring that records each safe's last reply and sends a communication-trouble event when a safe goes offline and again when it returns. I set the timing from real network and power outages on site, so that brief outages do not raise false alarms that operators learn to ignore.</li>
-          <li>The safes are polled in slots, not all at once, to spread the network traffic.</li>
-          <li>The safes enforce operating hours and time delays, so I added automatic clock correction when a safe's time drifts by a minute or more.</li>
-        </ul>
-
-        <h4>Alarm flood protection</h4>
-        <ul>
-          <li>The control room was being flooded with the same message repeatedly. The cause was one safe with a loose connection on an input, which changed state continuously and every change was forwarded as a genuine event.</li>
-          <li>I added rate limiting for each combination of safe and event code. Once a safe repeats the same event beyond a threshold within a minute, further copies are blocked, while its other events and all events from other safes still go through.</li>
-          <li>I added a traffic window that shows each safe's status and its message count for the last minute, so that a misbehaving safe can be identified at once.</li>
-        </ul>
-
-        <h4>Testing and commissioning</h4>
-        <ul>
-          <li>I had no copy of the client's monitoring software, so I wrote my own TCP server to stand in for it and verified the exact messages and format the alarm link produced for each safe event.</li>
-          <li>I then tested on the live system in the client's control room with their security team, working through each alarm type together.</li>
-          <li>I built a diagnostics window that sends test and custom messages on demand. The security team used it to configure the alarm types on their side without anyone having to force a real alarm at a safe.</li>
-          <li>I ran each version of the management software through repeated tests against a safe test jig before release, and the decision to release was mine.</li>
-          <li>I wrote the client user manual, covering first-time setup, the safe view and its twelve groups of settings with their defaults, each alarm with its risk and remedy, and the event codes.</li>
-        </ul>
-
-        <h4>What I took from it</h4>
-        <ul>
-          <li>Software that reports to a monitoring station must be designed for a misbehaving device, not only for the normal case. Repeated messages carry no new information and hide real alarms.</li>
-          <li>A system must say when it is not working. Without the heartbeat, an operator could watch a screen that looked normal while the server was down.</li>
-          <li>Watching the users is as useful as reading the requirements. The test page came from noticing how long the technicians took.</li>
-          <li>I would move the rate-limit and offline thresholds and the fixed UTC+2 time offset out of the code and into settings, so that they can be tuned for a site without a new release.</li>
-        </ul>
-
-        <div class="tags"><span>Client–server</span><span>MySQL</span><span>SQL</span><span>Multithreading</span><span>UDP / TCP</span><span>Contact ID</span><span>Role-based access</span><span>PDF reporting</span><span>Test automation</span><span>Technical writing</span></div>
-      </article>
-        
- <!-- PROJECT 5 -->
-      <article class="card proj">
-        <div class="mono">Software · C# · WinForms · MySQL · Dec 2024–Sep 2025</div>
-        <h3>Stock and ordering system, and production reporting tool</h3>
-        <p>I wrote two internal Windows applications from scratch in C# for an electronics manufacturer. The first is a stock and ordering system of about 16,800 lines over a MySQL parts database, which replaced the Excel workbook the company had bought components from since 2018. The second is a production reporting tool of about 4,300 lines that reads the company's ERP database. I worked without day-to-day supervision: I gathered the requirements, designed and wrote the software, tested it with its main user and decided when it could replace the spreadsheet. Component ordering for the company now runs on this software.</p>
-
-        <h4>The problem</h4>
-        <ul>
-          <li>The workbook held about 90 sheets, mostly one bill of materials (BOM) per product, and about 6,900 lines of macro code that read from and wrote to the parts database. It had become slow, and capturing a new BOM took about 7 minutes.</li>
-          <li>Most of its functions were restricted to one person, so nobody else could safely create parts, order batches or check the state of an order.</li>
-          <li>It counted all stock on the shelf as available, even when another open batch had already claimed it, and it ignored parts on order that had not yet been delivered.</li>
-          <li>A wrong order quantity has a direct cost. Too few parts stops production, and too many ties up money in stock. The replacement therefore had to give the same answers as the trusted spreadsheet before anyone could rely on it.</li>
-        </ul>
-
-        <h4>Requirements and design</h4>
-        <ul>
-          <li>There was no written specification. I sat with the procurement manager and had each step explained: capturing a BOM, building a batch from one or more BOMs, raising an order against a batch and booking in deliveries. I then read the workbook's formulas and macro code to confirm what each column calculated.</li>
-          <li>I built the application in C# with Windows Forms directly on the existing MySQL parts database, so that no data had to be migrated and the spreadsheet and the new software could run side by side on the same data.</li>
-          <li>The application has separate windows for parts, BOMs, batches, the batch manager, orders, deliveries and kits. A second database connection reads the ERP system for purchase orders, sales orders and finished-goods stock.</li>
-          <li>I defined four user roles: administrator, ordering, engineering and assembly manager. Each role is limited to the functions that person's work needs, following the principle of least privilege, so that a mistake or a misused login can only do limited damage.</li>
-        </ul>
-
-        <h4>Functions the spreadsheet did not have</h4>
-        <ul>
-          <li>The software warns at start-up about every part below its minimum stock level, and lists the orders not yet delivered. An order is marked delivered automatically from the quantities booked in.</li>
-          <li>A part can have more than one distributor, and the distributor's part number is filled in automatically on a new order.</li>
-          <li>An obsolete component can be replaced across every BOM that uses it in one operation, and the BOM options of a product are kept in step with each other.</li>
-          <li>The software exports the BOM for the contract assembly house and audits the BOM they return, reporting parts added, parts removed and reference designators that do not match.</li>
-          <li>Stock figures are synchronised with the ERP system.</li>
-        </ul>
-
-        <h4>Ordering calculations</h4>
-        <ul>
-          <li>For each part in a batch, the order quantity depends on the quantity needed, stock on hand, the minimum order quantity, the parts lost each time a reel is loaded on the pick-and-place machine, the quantity already ordered and the quantity already delivered.</li>
-          <li>I rebuilt each of the spreadsheet's calculations as a separate function, so that every result could be checked against the matching spreadsheet column.</li>
-          <li>The side-by-side comparison found three errors in my translation of the formulas: an order-of-operations error in the reel loss estimate, the wrong manual adjustment in one order quantity, and a missing adjustment in the outstanding delivery figure. I corrected all three before the software was used for real orders.</li>
-          <li>I replaced the raw stock figure with a moving stock figure: stock level, minus the quantity committed to other open batches, plus the quantity on other orders not yet delivered. My supervisor suggested the formula, and I confirmed that it matched the ERP system's definition of virtual stock before I implemented it.</li>
-        </ul>
-
-        <h4>SQL fault found and corrected</h4>
-        <ul>
-          <li>The procurement manager noticed a virtual stock figure that was wrong. I traced it to my own query, which joined each purchase order line to its delivery records and then summed the ordered quantity.</li>
-          <li>A line delivered in two or three part shipments has two or three delivery records, so the join counted its ordered quantity two or three times. The quantity on order was overstated, which made stock look healthier than it was and could hide a shortage.</li>
-          <li>I moved the ordered total into its own sub-query, so that the number of delivery records no longer affects it. The same fault existed in the reporting tool, and I corrected it there as well.</li>
-        </ul>
-
-        <h4>Verification and cutover</h4>
-        <ul>
-          <li>I treated the spreadsheet as the reference, because the company had ordered from it for years. I placed orders through both systems, using past orders as real test data, compared the results column by column and traced every difference to its cause.</li>
-          <li>Several functions needed new database columns while the database was in daily use. I copied the live database to a test database, made and tested each schema change there, and applied it to the live database only after it worked on the copy.</li>
-          <li>I kept the source in a Git repository on the company server, with a dated entry for each change describing what was changed and why.</li>
-          <li>I tested every function together with the procurement manager, and only then decided that the spreadsheet could be retired.</li>
-          <li>When the ERP system was later upgraded and its table and field names changed, I updated the queries in both applications to the new schema.</li>
-        </ul>
-
-        <h4>Production reporting tool</h4>
-        <ul>
-          <li>The tool reads the ERP database and shows the state of the company's orders in one place. Staff across the office use it to follow deadlines and deliveries.</li>
-          <li>It lists open order lines with quantity ordered, quantity delivered, creation date, deadline, priority, responsible person and workflow stage. It has separate views for purchase orders and sales orders, and filters by workflow stage, part name and part number.</li>
-          <li>Users can search by client and product for every order still to be delivered, change the responsible person and workflow stage, and edit the notes on each order line.</li>
-          <li>I added workshop tickets, which staff log, edit and close in the tool. The tickets are stored in the ERP system, so they are also visible there.</li>
-          <li>I produced a second build for an older version of the .NET Framework, so that the tool runs on the company's Windows 7 computers.</li>
-        </ul>
-
-        <h4>Outcome</h4>
-        <ul>
-          <li>The spreadsheet is retired, and component ordering runs on the software.</li>
-          <li>The procurement manager estimates that capturing a new BOM now takes about 2 minutes, against about 7 minutes in the spreadsheet.</li>
-          <li>Ordering is no longer limited to one person. Four kinds of user work on the same data, each with access suited to the role.</li>
-        </ul>
-
-        <h4>Limitations</h4>
-        <ul>
-          <li>Login names and access levels are fixed in the program. An administrator cannot add a user or change a role without a new build.</li>
-          <li>The assembly manager's restriction to one product family depends on the batch name containing that family's name, so a batch named differently would not appear for that user.</li>
-          <li>The software has no automated tests. Its correctness rests on the comparison with the spreadsheet and on testing with the users.</li>
-          <li>I did not write a user manual for either application.</li>
-        </ul>
-
-        <h4>What I took from it</h4>
-        <ul>
-          <li>Translating a formula is as error-prone as inventing one. Having a trusted reference to compare against is what caught my three errors.</li>
-          <li>A database join can silently multiply a total. I now check any summed figure against a hand count on a record that has more than one child record.</li>
-          <li>A process that exists only in one person's head has to be learned from that person before any code is written.</li>
-          <li>I started version control only after about 9,300 lines were written. On the next project, I would use it from the first day, write automated tests for the calculations, and manage users and roles in the database instead of in the code.</li>
-        </ul>
-
-        <div class="tags"><span>C#</span><span>.NET</span><span>WinForms</span><span>MySQL</span><span>SQL</span><span>ERP integration</span><span>Requirements gathering</span><span>Role-based access</span><span>Git</span><span>Legacy migration</span></div>
-      </article>
-
-    </div>
-    <p class="note">These are commercial projects, so source code and design files are not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
-  </div></section>
-</main>
-<footer><div class="wrap">© 2026 Tinashe Chingwaru · Cape Town, South Africa</div></footer>
-</body>
-</html>
+          <li>A client cannot ask the server directly whether it is running, so the server writes a heartbeat to a status table while it polls. Each client reads the newest entry and
