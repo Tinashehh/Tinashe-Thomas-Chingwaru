@@ -183,6 +183,79 @@
 
         <div class="tags"><span>Embedded firmware</span><span>STM32F4</span><span>FreeRTOS</span><span>LwIP</span><span>DeviceNet</span><span>PLC integration</span><span>Wiegand</span><span>Bluetooth</span><span>State machines</span><span>Root cause analysis</span></div>
       </article>
+
+
+              <article class="card proj">
+        <div class="mono">Software · Client–server · MySQL · Alarm signalling · [dates]</div>
+        <h3>Management and alarm software for networked electronic safes</h3>
+        <p>I was the developer of two PC programs that serve more than 20 networked electronic safes installed at a client's retail sites. The safes open by PIN, card or face recognition, enforce time delays and door interlocks, and raise tamper, duress and forced-entry alarms. The first program is the operators' management tool for status, settings, users, door operation, firmware updates and event logs. The second is the alarm link, which polls the safes over UDP, converts their events to Contact ID messages in Sur-Gard receiver format, and forwards them over TCP to the client's alarm monitoring software. I took over both programs from earlier developers, and all later versions are my work.</p>
+
+        <h4>From a single-user tool to a server and client system</h4>
+        <ul>
+          <li>The inherited tool ran on one PC for one user and kept its device list in a local file. The client needed several control-room operators working on the same safes, an event history that outlives any one PC, and control over who may change what.</li>
+          <li>I agreed the architecture with my supervisor and then built it. The server runs on a remote machine and the clients run in the control room, with no direct route between them, so I made a MySQL database the link between the two.</li>
+          <li>The server polls the safes, records their status, writes events to the log and publishes shared settings such as the safe list and firmware files. Each client synchronises its safe list with the database on start-up. The schema has six tables: devices, users, event logs, environment settings, server status and database version.</li>
+          <li>A client cannot ask the server directly whether it is running, so the server writes a heartbeat to a status table while it polls. Each client reads the newest entry and treats the server as down when the entry is stale, and shows this on a green, orange or red status bar. Operators therefore know when the picture on screen is out of date.</li>
+          <li>The server refuses to start if another instance is already running, so that two servers cannot poll the same safes.</li>
+          <li>I put all database operations on a thread-safe queue served by a worker thread, so that neither the user interface nor the UDP communication waits for the database. I added locks on the lists that the UDP layer shares between threads.</li>
+          <li>I implemented role-based access control with three roles: administrator, manager and user. Ordinary users can view and operate a safe, and only a manager can remove a safe or manage logins.</li>
+          <li>Over these releases, the code base grew from about 10,600 lines in 62 files to about 28,100 lines in 125 files.</li>
+        </ul>
+
+        <h4>Features for operators</h4>
+        <ul>
+          <li>I built the safe view window that the client had asked for, from which operators see each safe and operate it remotely.</li>
+          <li>I added an alarm column on the main window that flags conditions such as a disabled safe, a disabled interlock or a clock out of sync, and a window that shows how many messages each safe is sending to the alarm link per minute.</li>
+          <li>I blocked other packets during a firmware update, and added migration of safe users when upgrading across a change in the firmware's memory layout.</li>
+          <li>I fixed list flicker and unwanted re-selection caused by automatic status packets, and added CSV import, time synchronisation and input length limits.</li>
+          <li>Older safe firmware ignored a settings packet of the wrong length. I padded the packet to the expected length in the software, which restored the function for safes already in the field without a firmware change.</li>
+        </ul>
+
+        <h4>Guided production test page</h4>
+        <ul>
+          <li>I noticed that technicians were taking a long time to test each safe by hand from a paper sign-off sheet. Nobody had asked for a tool, so I proposed and built one into the software.</li>
+          <li>The page takes the technician through eleven stages in a fixed order: safe details, card reader, keypad key by key, each door, bolt lock, Bluetooth registration button, siren, vibration sensor, alarm output, alarm input and EEPROM.</li>
+          <li>At each stage, the page either drives the safe itself or prompts the technician, then waits for the safe to report the matching result and marks the stage OK or FAULTY. It checks for conditions that would spoil a result, such as a door that is already open, and allows a retry.</li>
+          <li>I used a colleague's existing manual test procedure as the specification. The page saves a timestamped report for each safe, which replaces the hand-written sheet.</li>
+          <li>I timed myself testing one safe each way. The manual sheet took about 20 minutes and the test page took less than 5 minutes.</li>
+        </ul>
+
+        <h4>Alarm link to the monitoring software</h4>
+        <ul>
+          <li>The alarm link had been written for intercom nodes. I extended it to the safes, so that their Contact ID events are forwarded in Sur-Gard format, and added a configuration file that maps each MIFARE access card to a user in the monitoring software.</li>
+          <li>After release, safe events were not handled correctly. I traced this to the event qualifier, which the safe already sent in Sur-Gard form while the program expected the unconverted form, so its case statement never matched. I corrected the handling.</li>
+          <li>A safe that stops communicating cannot report an alarm. I added connection monitoring that records each safe's last reply and sends a Contact ID 350 communication-trouble event when a safe goes offline and again when it returns. I set the timing from real network and power outages on site, so that brief outages do not raise false alarms that operators learn to ignore.</li>
+          <li>The safes are polled in slots, not all at once, to spread the network traffic.</li>
+          <li>The safes enforce operating hours and time delays, so I added automatic clock correction when a safe's time drifts by a minute or more.</li>
+        </ul>
+
+        <h4>Alarm flood protection</h4>
+        <ul>
+          <li>The control room was being flooded with the same message repeatedly. The cause was one safe with a loose connection on an input, which changed state continuously, and every change was forwarded as a genuine event.</li>
+          <li>I added rate limiting for each combination of safe and event code. Once a safe repeats the same event beyond a threshold within a minute, further copies are blocked, while its other events and all events from other safes still go through.</li>
+          <li>I added an isolation setting so that a safe under repair sends nothing to the monitoring software, and made the forwarding of routine log events optional, because they are records and not alarms.</li>
+          <li>I added a traffic window that shows each safe's status and its message count for the last minute, so that a misbehaving safe can be identified at once.</li>
+        </ul>
+
+        <h4>Testing and commissioning</h4>
+        <ul>
+          <li>I had no copy of the client's monitoring software, so I wrote my own TCP server to stand in for it and verified the exact messages and format the alarm link produced for each safe event.</li>
+          <li>I then tested on the live system in the client's control room with their security team, working through each alarm type together.</li>
+          <li>I built a diagnostics window that sends test and custom messages on demand. The security team used it to configure the alarm types on their side without anyone having to force a real alarm at a safe.</li>
+          <li>I ran each version of the management software through repeated tests against a safe test jig before release, and the decision to release was mine.</li>
+          <li>I wrote the client user manual, covering first-time setup, the safe view and its twelve groups of settings with their defaults, each alarm with its risk and remedy, and the event codes.</li>
+        </ul>
+
+        <h4>What I took from it</h4>
+        <ul>
+          <li>Software that reports to a monitoring station must be designed for a misbehaving device, not only for the normal case. Repeated messages carry no new information and hide real alarms.</li>
+          <li>A system must say when it is not working. Without the heartbeat, an operator could watch a screen that looked normal while the server was down.</li>
+          <li>Watching the users is as useful as reading the requirements. The test page came from noticing how long the technicians took.</li>
+          <li>I would move the rate-limit and offline thresholds and the fixed UTC+2 time offset out of the code and into settings, so that they can be tuned for a site without a new release.</li>
+        </ul>
+
+        <div class="tags"><span>Client–server</span><span>MySQL</span><span>Multithreading</span><span>UDP / TCP</span><span>Contact ID</span><span>Sur-Gard</span><span>Role-based access</span><span>Test automation</span><span>Technical writing</span></div>
+      </article>
         
 
     </div>
