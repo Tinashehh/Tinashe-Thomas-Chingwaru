@@ -60,3 +60,22 @@ footer{padding:28px 0;border-top:1px solid var(--line);color:var(--muted);font-s
 .explore h3{font-size:1.2rem;margin:6px 0 8px}
 .explore p{color:var(--muted);font-size:.95rem;margin:0 0 14px}
 main{min-height:70vh}
+
+/* Per-project colours: cycle repeats every 5 cards */
+:root{
+  --p1:#0b6b4f; --p2:#c9872a; --p3:#2f6fb5; --p4:#b5483a; --p5:#7a55a8;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --p1:#3fc79a; --p2:#e0a54a; --p3:#6fa8e6; --p4:#e8857a; --p5:#b594e0;
+  }
+}
+.grid>.proj:nth-child(5n+1){--proj:var(--p1)}
+.grid>.proj:nth-child(5n+2){--proj:var(--p2)}
+.grid>.proj:nth-child(5n+3){--proj:var(--p3)}
+.grid>.proj:nth-child(5n+4){--proj:var(--p4)}
+.grid>.proj:nth-child(5n){--proj:var(--p5)}
+.proj::before{background:var(--proj,var(--trace))}
+.proj>.mono,.proj h4{color:var(--proj,var(--muted))}
+.proj h4{margin:18px 0 8px;font-size:.95rem}
+.proj .tags span{border-color:color-mix(in srgb,var(--proj,var(--line)) 55%,var(--line))}
