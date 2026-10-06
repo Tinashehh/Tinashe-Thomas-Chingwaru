@@ -20,7 +20,9 @@
       <article class="card proj">
         <div class="mono">Software · C#/.NET · Jun–Dec 2023</div>
         <h3>Field firmware update for IP intercom nodes</h3>
-        <p>Built the firmware update feature in a legacy Windows configuration tool for SIP/VoIP intercom nodes installed in high-security sites, where site visits are costly and restricted, so the client's own staff update live devices over the network.</p>
+        <p>Extended a legacy Windows configuration tool for SIP/VoIP intercom nodes installed in high-security sites, where site visits are costly and restricted, so the client's own staff update live devices over the network. I added firmware update, per-input reporting and codec selection, fixed three existing faults and wrote the user manual.</p>
+
+        <h4>Firmware update</h4>
         <ul>
           <li>Reused the production firmware loader instead of extending a separate UDP download, so field updates and factory programming share one proven method across four device variants on two processor families (STM32F7 and dsPIC33).</li>
           <li>Classified each discovered node by its reported hardware version and node type, then updated nodes one at a time, because some client networks had switches without multicast support.</li>
@@ -28,37 +30,32 @@
           <li>Added file-name checks per device variant and a confirmation step as a second safety layer in front of the firmware's own protection.</li>
           <li>Tested on all four variants and on runs of up to 10 nodes, checking audio, settings and functions after each update.</li>
         </ul>
-        <div class="tags"><span>C#</span><span>.NET Framework</span><span>Firmware update</span><span>STM32F7</span><span>dsPIC33</span></div>
-      </article>
 
-      <article class="card proj">
-        <div class="mono">Protocol · UDP · VoIP</div>
-        <h3>Extending a legacy UDP protocol without breaking it</h3>
-        <p>Added per-input change-of-state reporting and audio codec selection to a binary UDP protocol whose only documentation was seven years out of date.</p>
+        <h4>Protocol extension</h4>
         <ul>
-          <li>Compared the old protocol document with the existing code to map which of the 20 sixteen-bit data words per packet were in use and which were free.</li>
+          <li>The only protocol documentation was seven years out of date, so I compared it with the existing code to map which of the 20 sixteen-bit data words per packet were in use and which were free.</li>
           <li>Packed six per-input reporting flags into a byte that previously held only 0 or 1, keeping bit 0 as the overall enable so older values keep their meaning.</li>
           <li>Proposed codec selection myself after noticing mismatched codecs were degrading audio in the field. Implemented G.711 µ-law / G.722 switching in an unused data word, using the standard RTP payload type numbers.</li>
           <li>Agreed the packet layout with the firmware developer before either of us changed code.</li>
         </ul>
-        <div class="tags"><span>UDP</span><span>Protocol design</span><span>RTP</span><span>G.711 / G.722</span><span>Backward compatibility</span></div>
-      </article>
 
-      <article class="card proj">
-        <div class="mono">Debugging · Documentation</div>
-        <h3>Legacy faults, user manual and lessons</h3>
-        <p>Working in a code base inherited from earlier developers, in a language I was learning on the job, I fixed three existing faults and documented the update procedure for non-engineers.</p>
+        <h4>Debugging and documentation</h4>
         <ul>
           <li>Captured the tool's packets with Wireshark, compared them with the protocol document and found the set-MAC-address command was sending the wrong sub-command. Verified the fix by power-cycling a node and confirming the address persisted.</li>
           <li>Fixed input trigger polarity (high-level triggers could not be configured) and a copy-paste fault where one input read another input's timing value, and added read-back of those settings from the node.</li>
           <li>Wrote a seven-page user manual with 14 annotated screenshots for the client staff who run the updates.</li>
-          <li>Reviewing the design later, I would call the loader's library directly instead of launching it as a separate process, run updates off the UI thread, and log failure detail and retry failed nodes.</li>
         </ul>
-        <div class="tags"><span>Wireshark</span><span>Legacy code</span><span>Hardware-in-the-loop testing</span><span>Technical writing</span></div>
+
+        <h4>What I would do differently</h4>
+        <ul>
+          <li>Call the loader's library directly instead of launching it as a separate process, run updates off the UI thread, and log failure detail and retry failed nodes.</li>
+        </ul>
+
+        <div class="tags"><span>C#</span><span>.NET Framework</span><span>UDP</span><span>RTP</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
       </article>
 
     </div>
-    <p class="note">These cards describe one commercial project, so source code is not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
+    <p class="note">This is a commercial project, so source code is not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
 </main>
 <footer><div class="wrap">© 2026 Tinashe Chingwaru · Cape Town, South Africa</div></footer>
