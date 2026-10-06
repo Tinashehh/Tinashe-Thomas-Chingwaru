@@ -264,9 +264,98 @@
         <div class="tags"><span>Client–server</span><span>MySQL</span><span>SQL</span><span>Multithreading</span><span>UDP / TCP</span><span>Contact ID</span><span>Role-based access</span><span>PDF reporting</span><span>Test automation</span><span>Technical writing</span></div>
       </article>
         
+ <!-- PROJECT 5 -->
+      <article class="card proj">
+        <div class="mono">Software · C# · WinForms · MySQL · Dec 2024–Sep 2025</div>
+        <h3>Stock and ordering system, and production reporting tool</h3>
+        <p>I wrote two internal Windows applications from scratch in C# for an electronics manufacturer. The first is a stock and ordering system of about 16,800 lines over a MySQL parts database, which replaced the Excel workbook the company had bought components from since 2018. The second is a production reporting tool of about 4,300 lines that reads the company's ERP database. I worked without day-to-day supervision: I gathered the requirements, designed and wrote the software, tested it with its main user and decided when it could replace the spreadsheet. Component ordering for the company now runs on this software.</p>
+
+        <h4>The problem</h4>
+        <ul>
+          <li>The workbook held about 90 sheets, mostly one bill of materials (BOM) per product, and about 6,900 lines of macro code that read from and wrote to the parts database. It had become slow, and capturing a new BOM took about 7 minutes.</li>
+          <li>Most of its functions were restricted to one person, so nobody else could safely create parts, order batches or check the state of an order.</li>
+          <li>It counted all stock on the shelf as available, even when another open batch had already claimed it, and it ignored parts on order that had not yet been delivered.</li>
+          <li>A wrong order quantity has a direct cost. Too few parts stops production, and too many ties up money in stock. The replacement therefore had to give the same answers as the trusted spreadsheet before anyone could rely on it.</li>
+        </ul>
+
+        <h4>Requirements and design</h4>
+        <ul>
+          <li>There was no written specification. I sat with the procurement manager and had each step explained: capturing a BOM, building a batch from one or more BOMs, raising an order against a batch and booking in deliveries. I then read the workbook's formulas and macro code to confirm what each column calculated.</li>
+          <li>I built the application in C# with Windows Forms directly on the existing MySQL parts database, so that no data had to be migrated and the spreadsheet and the new software could run side by side on the same data.</li>
+          <li>The application has separate windows for parts, BOMs, batches, the batch manager, orders, deliveries and kits. A second database connection reads the ERP system for purchase orders, sales orders and finished-goods stock.</li>
+          <li>I defined four user roles: administrator, ordering, engineering and assembly manager. Each role is limited to the functions that person's work needs, following the principle of least privilege, so that a mistake or a misused login can only do limited damage.</li>
+        </ul>
+
+        <h4>Functions the spreadsheet did not have</h4>
+        <ul>
+          <li>The software warns at start-up about every part below its minimum stock level, and lists the orders not yet delivered. An order is marked delivered automatically from the quantities booked in.</li>
+          <li>A part can have more than one distributor, and the distributor's part number is filled in automatically on a new order.</li>
+          <li>An obsolete component can be replaced across every BOM that uses it in one operation, and the BOM options of a product are kept in step with each other.</li>
+          <li>The software exports the BOM for the contract assembly house and audits the BOM they return, reporting parts added, parts removed and reference designators that do not match.</li>
+          <li>Stock figures are synchronised with the ERP system.</li>
+        </ul>
+
+        <h4>Ordering calculations</h4>
+        <ul>
+          <li>For each part in a batch, the order quantity depends on the quantity needed, stock on hand, the minimum order quantity, the parts lost each time a reel is loaded on the pick-and-place machine, the quantity already ordered and the quantity already delivered.</li>
+          <li>I rebuilt each of the spreadsheet's calculations as a separate function, so that every result could be checked against the matching spreadsheet column.</li>
+          <li>The side-by-side comparison found three errors in my translation of the formulas: an order-of-operations error in the reel loss estimate, the wrong manual adjustment in one order quantity, and a missing adjustment in the outstanding delivery figure. I corrected all three before the software was used for real orders.</li>
+          <li>I replaced the raw stock figure with a moving stock figure: stock level, minus the quantity committed to other open batches, plus the quantity on other orders not yet delivered. My supervisor suggested the formula, and I confirmed that it matched the ERP system's definition of virtual stock before I implemented it.</li>
+        </ul>
+
+        <h4>SQL fault found and corrected</h4>
+        <ul>
+          <li>The procurement manager noticed a virtual stock figure that was wrong. I traced it to my own query, which joined each purchase order line to its delivery records and then summed the ordered quantity.</li>
+          <li>A line delivered in two or three part shipments has two or three delivery records, so the join counted its ordered quantity two or three times. The quantity on order was overstated, which made stock look healthier than it was and could hide a shortage.</li>
+          <li>I moved the ordered total into its own sub-query, so that the number of delivery records no longer affects it. The same fault existed in the reporting tool, and I corrected it there as well.</li>
+        </ul>
+
+        <h4>Verification and cutover</h4>
+        <ul>
+          <li>I treated the spreadsheet as the reference, because the company had ordered from it for years. I placed orders through both systems, using past orders as real test data, compared the results column by column and traced every difference to its cause.</li>
+          <li>Several functions needed new database columns while the database was in daily use. I copied the live database to a test database, made and tested each schema change there, and applied it to the live database only after it worked on the copy.</li>
+          <li>I kept the source in a Git repository on the company server, with a dated entry for each change describing what was changed and why.</li>
+          <li>I tested every function together with the procurement manager, and only then decided that the spreadsheet could be retired.</li>
+          <li>When the ERP system was later upgraded and its table and field names changed, I updated the queries in both applications to the new schema.</li>
+        </ul>
+
+        <h4>Production reporting tool</h4>
+        <ul>
+          <li>The tool reads the ERP database and shows the state of the company's orders in one place. Staff across the office use it to follow deadlines and deliveries.</li>
+          <li>It lists open order lines with quantity ordered, quantity delivered, creation date, deadline, priority, responsible person and workflow stage. It has separate views for purchase orders and sales orders, and filters by workflow stage, part name and part number.</li>
+          <li>Users can search by client and product for every order still to be delivered, change the responsible person and workflow stage, and edit the notes on each order line.</li>
+          <li>I added workshop tickets, which staff log, edit and close in the tool. The tickets are stored in the ERP system, so they are also visible there.</li>
+          <li>I produced a second build for an older version of the .NET Framework, so that the tool runs on the company's Windows 7 computers.</li>
+        </ul>
+
+        <h4>Outcome</h4>
+        <ul>
+          <li>The spreadsheet is retired, and component ordering runs on the software.</li>
+          <li>The procurement manager estimates that capturing a new BOM now takes about 2 minutes, against about 7 minutes in the spreadsheet.</li>
+          <li>Ordering is no longer limited to one person. Four kinds of user work on the same data, each with access suited to the role.</li>
+        </ul>
+
+        <h4>Limitations</h4>
+        <ul>
+          <li>Login names and access levels are fixed in the program. An administrator cannot add a user or change a role without a new build.</li>
+          <li>The assembly manager's restriction to one product family depends on the batch name containing that family's name, so a batch named differently would not appear for that user.</li>
+          <li>The software has no automated tests. Its correctness rests on the comparison with the spreadsheet and on testing with the users.</li>
+          <li>I did not write a user manual for either application.</li>
+        </ul>
+
+        <h4>What I took from it</h4>
+        <ul>
+          <li>Translating a formula is as error-prone as inventing one. Having a trusted reference to compare against is what caught my three errors.</li>
+          <li>A database join can silently multiply a total. I now check any summed figure against a hand count on a record that has more than one child record.</li>
+          <li>A process that exists only in one person's head has to be learned from that person before any code is written.</li>
+          <li>I started version control only after about 9,300 lines were written. On the next project, I would use it from the first day, write automated tests for the calculations, and manage users and roles in the database instead of in the code.</li>
+        </ul>
+
+        <div class="tags"><span>C#</span><span>.NET</span><span>WinForms</span><span>MySQL</span><span>SQL</span><span>ERP integration</span><span>Requirements gathering</span><span>Role-based access</span><span>Git</span><span>Legacy migration</span></div>
+      </article>
 
     </div>
-    <p class="note">This is a commercial project, so source code is not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
+    <p class="note">These are commercial projects, so source code and design files are not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
 </main>
 <footer><div class="wrap">© 2026 Tinashe Chingwaru · Cape Town, South Africa</div></footer>
