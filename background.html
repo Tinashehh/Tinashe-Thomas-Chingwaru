@@ -9,23 +9,20 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-  .bg { max-width: 760px; margin: 0; }
-  .bg section + section { margin-top: 40px; }
-  .bg h2 { font-size: 1.15rem; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line, rgba(127,127,127,.25)); }
-  .entry { margin: 0 0 16px; }
-  .entry:last-child { margin-bottom: 0; }
+  .bg-section { padding-top: 40px; }
+  .bg { max-width: 760px; }
+  .bg .block + .block { margin-top: 44px; }
+  .bg h2 { font-size: 1.25rem; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .entry + .entry { margin-top: 16px; }
   .entry .name { font-weight: 600; }
-  .entry .meta { color: var(--muted); font-size: .95em; margin-top: 2px; }
+  .entry .meta { color: var(--muted); font-size: .93rem; margin-top: 2px; }
   .bg ul.plain { list-style: none; padding: 0; margin: 0; }
-  .bg ul.plain li { margin: 0 0 12px; }
-  .bg ul.plain li:last-child { margin-bottom: 0; }
-  .bg table { width: 100%; border-collapse: collapse; }
-  .bg td { padding: 10px 0; vertical-align: top; border-top: 1px solid var(--line, rgba(127,127,127,.18)); }
-  .bg tr:first-child td { border-top: 0; }
-  .bg td:first-child { width: 160px; padding-right: 16px; font-weight: 600; }
+  .bg ul.plain li + li { margin-top: 12px; }
+  .bg td:first-child { width: 170px; color: var(--ink); font-weight: 500; }
   @media (max-width: 560px) {
-    .bg td { display: block; width: auto; padding: 0; border: 0; }
-    .bg td:first-child { padding-top: 12px; }
+    .bg td { display: block; width: auto; border: 0; padding: 0; }
+    .bg td:first-child { padding-top: 14px; }
+    .bg tr { display: block; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
   }
 </style>
 </head>
@@ -34,9 +31,9 @@
 <main>
 <div class="wrap page-head"><div class="mono">Background</div><h1>Background</h1><p>Electronic engineer working across firmware, hardware and the PC software that drives them, on products installed in secure facilities where a fault is a safety issue.</p></div>
 
-<div class="wrap"><div class="bg">
+<section class="bg-section"><div class="wrap"><div class="bg">
 
-  <section>
+  <div class="block">
     <h2>Certifications and courses</h2>
     <div class="entry">
       <div class="name">Google Cybersecurity Professional Certificate</div>
@@ -46,9 +43,9 @@
       <div class="name">SOC Analyst Learning Path</div>
       <div class="meta">LetsDefend · 2026 · Log analysis, incident handling, threat analysis · <a href="https://app.letsdefend.io/certificate/show/6c3ce4e1-76dd-49f5-acb4-a8f406735728" target="_blank" rel="noopener">Verify</a></div>
     </div>
-  </section>
+  </div>
 
-  <section>
+  <div class="block">
     <h2>Education and registration</h2>
     <div class="entry">
       <div class="name">BEng Electrical and Electronic Engineering</div>
@@ -58,20 +55,20 @@
       <div class="name">Candidate Engineer</div>
       <div class="meta">Engineering Council of South Africa (ECSA) · registered 2021</div>
     </div>
-  </section>
+  </div>
 
-  <section>
+  <div class="block">
     <h2>How I work</h2>
     <ul class="plain">
       <li><strong>Evidence before replacement.</strong> I form a hypothesis from the circuit or code, then prove it by measurement.</li>
       <li><strong>Reproduce it first.</strong> If a fault only happens on site, I build the rig that makes it happen on the bench.</li>
       <li><strong>Whole-system view.</strong> A fault may sit in the hardware, firmware, app or test equipment. I check all of them.</li>
-      <li><strong>Test the failure, not just the success.</strong> blah blah.</li>
+      <li><strong>Test the failure, not just the success.</strong> Blah blah.</li>
       <li><strong>Leave a trail.</strong> Change control, test records and user documentation are part of the job.</li>
     </ul>
-  </section>
+  </div>
 
-  <section>
+  <div class="block">
     <h2>Skills</h2>
     <table>
       <tr><td>Embedded firmware</td><td>C on STM32F4 and STM32F7 (Cortex-M4/M7), FreeRTOS, LwIP, UDP protocol design, DeviceNet, Wiegand, Bluetooth Low Energy, boot loaders and dual-bank firmware update, flash-backed settings</td></tr>
@@ -81,13 +78,13 @@
       <tr><td>Security</td><td>SOC analysis: log analysis, incident handling, threat analysis; least-privilege access design</td></tr>
       <tr><td>Bench and tools</td><td>Oscilloscope and multimeter fault-finding, fine-pitch SMD and hot-air rework, Wireshark packet analysis, ST-LINK and SWD programming</td></tr>
     </table>
-  </section>
+  </div>
 
   <!-- CV: upload your CV as cv.pdf next to this file, then remove these comment marks:
   <p style="margin-top:32px"><a class="btn ghost" href="cv.pdf" download>Download CV</a></p>
   -->
 
-</div></div>
+</div></div></section>
 </main>
 <footer><div class="wrap">© 2026 Tinashe Chingwaru · Cape Town, South Africa</div></footer>
 </body>
