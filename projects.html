@@ -25,11 +25,11 @@
         <ul>
           <li>One tool now updates four device variants on two processor families, node by node, and reports exactly which nodes failed, so site staff know what still runs old firmware.</li>
           <li>Proved the update cannot brick a node: cut power and pulled the Ethernet link mid-transfer on both hardware families, and every node fell back to its working image through the dual-bank flash fail-safe.</li>
-          <li>Traced both update paths through the node firmware, an in-application bank write with XOR checksum validation on the dsPIC33E and a boot-loader handover on the STM32F7, and used that analysis to replace the tool's built-in download with the proven production loader.</li>
-          <li>Added features to a fixed 52-byte UDP protocol without a single new command: the codec as an RTP payload type in a spare data word (G.711 at 8 kHz or G.722 at 16 kHz), and six input reporting flags in an existing byte, kept backward compatible with nodes already installed.</li>
+          <li>Traced both update paths through the node firmware, an in-application bank write with XOR checksum validation on the dsPIC33E and a boot-loader handover on the STM32F7 and used that analysis to replace the tool's built-in download with the proven production loader.</li>
+          <li>Added features to a fixed length UDP protocol without a single new command: the codec as an RTP payload type in a spare data word (G.711 at 8 kHz or G.722 at 16 kHz) and six input reporting flags in an existing byte, kept backward compatible with nodes already installed.</li>
           <li>Root-caused three long-standing configuration bugs from packet captures and firmware source, including a MAC address command that used the read sub-command instead of the write sub-command, so nodes acknowledged and changed nothing. Verified every fix by power-cycling the node and reading the setting back from flash.</li>
-          <li>Diagnosed poor field audio as a codec and sample-rate mismatch, and proposed and built the codec selection that fixed it.</li>
-          <li>Wrote the illustrated update manual for site staff, and added per-variant file checks in front of the firmware's own hardware-version interlock.</li>
+          <li>Diagnosed poor field audio as a codec and sample-rate mismatch and proposed and built the codec selection that fixed it.</li>
+          <li>Wrote the illustrated update manual for site staff and added per-variant file checks in front of the firmware's own hardware-version interlock.</li>
         </ul>
         <div class="tags"><span>C#</span><span>Embedded</span><span>UDP protocol</span><span>Boot loader</span><span>Dual-bank flash</span><span>VoIP / RTP</span><span>Wireshark</span></div>
       </article>
