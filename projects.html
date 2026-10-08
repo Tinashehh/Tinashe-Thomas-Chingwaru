@@ -18,57 +18,20 @@
 
     <div class="grid" style="display:grid; grid-template-columns:1fr;">
 
-      <article class="card proj">
-        <div class="mono">Software · C#/.NET Framework · Jun–Dec 2023</div>
+            <article class="card proj">
+        <div class="mono">Embedded systems · C#/.NET · STM32F7 / dsPIC33E · UDP · VoIP</div>
         <h3>Field firmware update for IP intercom nodes</h3>
-        <p>As a junior embedded software engineer, I extended a legacy WinForms configuration and maintenance tool for SIP/VoIP intercom nodes deployed in high-security sites. The tool discovers nodes over UDP, reads and writes their settings, and updates their firmware. Site visits are costly and access is restricted, so the client's own staff flash live devices over Ethernet. The update path therefore had to send the correct image to the correct hardware and report every node that failed.</p>
-        <p>I inherited a code base dating from 2017 or earlier and had no prior C# experience. I delivered firmware update, per-input change-of-state reporting and codec selection. I also corrected three existing faults and wrote the user manual.</p>
-
-        <h4>Firmware update</h4>
+        <p>Made remote firmware updates possible for VoIP intercom nodes in secure facilities, where devices cannot be reached by hand and site staff update them over the live network. I extended the Windows maintenance tool with network firmware update, per-input event reporting and codec selection, designing each change against the node firmware and hardware on two processor families.</p>
         <ul>
-          <li>I replaced the tool's built-in UDP download, which had been written only for the dsPIC33 nodes, with the command-line loader already used in production programming. Field updates and factory programming now share one proven method.</li>
-          <li>I added support for four device variants on two processor families. There are two node types, each with an older dsPIC33 hardware revision and a newer STM32F7 revision, and each variant has its own Intel HEX image.</li>
-          <li>I sorted the selected nodes into four lists using the hardware version and node type that each node reports in its discovery response, so the operator never has to identify hardware by hand.</li>
-          <li>For each node, I started one loader process and passed it the local IP address, target IP address, HEX file, processor family and device type as arguments. I waited for the process to exit and treated a non-zero exit code as a failure. The tool lists the failed nodes by IP address at the end of the run.</li>
-          <li>My first version, in July 2023, generated a single batch file covering every node. I replaced it in September 2023 with the per-node process model, because a batch run could not give me a result for each node.</li>
-          <li>I updated the nodes one at a time by unicast address, because some client sites had switches that did not support multicast.</li>
-          <li>I wrote a firmware selection form with one file picker per variant. Each dialog filters on that variant's file-name pattern, and the code rejects a name that does not match. This is a second layer in front of the firmware's own image validation. A confirmation dialog names the file before anything is sent.</li>
-          <li>I stored the loader path and the four firmware selections as .NET user settings, so they survive a restart.</li>
+          <li>One tool now updates four device variants on two processor families, node by node, and reports exactly which nodes failed, so site staff know what still runs old firmware.</li>
+          <li>Proved the update cannot brick a node: cut power and pulled the Ethernet link mid-transfer on both hardware families, and every node fell back to its working image through the dual-bank flash fail-safe.</li>
+          <li>Traced both update paths through the node firmware, an in-application bank write with XOR checksum validation on the dsPIC33E and a boot-loader handover on the STM32F7, and used that analysis to replace the tool's built-in download with the proven production loader.</li>
+          <li>Added features to a fixed 52-byte UDP protocol without a single new command: the codec as an RTP payload type in a spare data word (G.711 at 8 kHz or G.722 at 16 kHz), and six input reporting flags in an existing byte, kept backward compatible with nodes already installed.</li>
+          <li>Root-caused three long-standing configuration bugs from packet captures and firmware source, including a MAC address command that used the read sub-command instead of the write sub-command, so nodes acknowledged and changed nothing. Verified every fix by power-cycling the node and reading the setting back from flash.</li>
+          <li>Diagnosed poor field audio as a codec and sample-rate mismatch, and proposed and built the codec selection that fixed it.</li>
+          <li>Wrote the illustrated update manual for site staff, and added per-variant file checks in front of the firmware's own hardware-version interlock.</li>
         </ul>
-
-        <h4>Protocol extension</h4>
-        <ul>
-          <li>The proprietary protocol uses a fixed-layout UDP datagram. It carries two magic words, a sequence number, a return port, a packet count, a 16-bit command word and twenty 16-bit data words. The only specification was a spreadsheet seven years out of date, which described four inputs and had no codec field.</li>
-          <li>I compared that specification with the existing C# source to find which data words and bits were in use and which were free. I then placed the new settings in spare space in existing commands instead of adding new command codes.</li>
-          <li>For per-input reporting, the settings command carried one byte that had only ever held 0 or 1. I kept bit 0 as the global enable and used bits 1 to 6 as a mask for inputs 0 to 5, so the old value keeps its meaning. I packed the byte on write and decoded it in both code paths that parse the node's settings response.</li>
-          <li>I proposed codec selection after noticing that nodes in the field ran different codecs and that a mismatch degraded the audio. I used a data word in the audio settings packet that had always been sent as zero. The low byte holds the codec and the high byte holds the update flag, following the protocol's existing keep-or-update convention.</li>
-          <li>The codec value is the standard RTP payload type: 0 for PCMU (G.711 µ-law) and 9 for G.722. The tool also displays the value that the node reports back.</li>
-          <li>I agreed the bit and word positions with the engineer who maintained the node firmware before either of us changed any code. He made the matching firmware changes and updated the specification.</li>
-        </ul>
-
-        <h4>Faults found and corrected</h4>
-        <ul>
-          <li>I captured the tool's datagrams in Wireshark, compared them field by field with the specification, and found that the set-MAC-address command was sending the wrong sub-command. After correcting it, I changed a node's MAC address, power-cycled the node and confirmed that the new address had been retained.</li>
-          <li>The tool sent 0 for both trigger-high and trigger-low on two inputs, so an active-high trigger could not be configured. I corrected the encoding and added read-back of the function and trigger settings from the node.</li>
-          <li>The trigger time for one input was being read from another input's text box. I traced the fault from incorrect behaviour on a node back to the form code and corrected it.</li>
-        </ul>
-
-        <h4>Testing and documentation</h4>
-        <ul>
-          <li>I tested against real hardware on a bench test jig. I ran firmware updates on all four variants and on up to 10 nodes in a single run. After each update, I checked the audio quality, the stored configuration and the node's functions.</li>
-          <li>I wrote a seven-page user manual with 14 annotated screenshots for the client staff who run the updates. It covers loader and firmware selection, how to tell old hardware from new hardware for each device, and how to read the result dialog.</li>
-        </ul>
-
-        <h4>Limitations and what I would change</h4>
-        <ul>
-          <li>The update loop ran on the UI thread, so the main window was blocked during a run. I would move it to a background task with progress reporting and cancellation.</li>
-          <li>I read the loader's standard output to the end before reading standard error, which can deadlock if the child process fills the error pipe. I would read both streams asynchronously.</li>
-          <li>The tool captured the loader's output but did not show or log it, so the failure dialog gave only the IP address. I would log the output for each node and add a retry for failed nodes.</li>
-          <li>Validation was by file name only, so a renamed file would pass my check, and a node with an unrecognised hardware version fell into a default list. I would validate the image itself and reject unknown hardware explicitly.</li>
-          <li>With more C# experience, I would call the loader's library (DLL) directly instead of starting it as a separate process. That would give the tool direct access to progress and error information and would remove most of the issues above.</li>
-        </ul>
-
-        <div class="tags"><span>C#</span><span>.NET Framework</span><span>WinForms</span><span>UDP</span><span>SIP / VoIP</span><span>RTP</span><span>G.711 / G.722</span><span>STM32F7</span><span>dsPIC33</span><span>Wireshark</span><span>Technical writing</span></div>
+        <div class="tags"><span>C#</span><span>Embedded</span><span>UDP protocol</span><span>Boot loader</span><span>Dual-bank flash</span><span>VoIP / RTP</span><span>Wireshark</span></div>
       </article>
 
       <article class="card proj">
