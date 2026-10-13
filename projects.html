@@ -18,41 +18,50 @@
 
     <div class="grid" style="display:grid; grid-template-columns:1fr;">
 
-            <article class="card proj">
-        <div class="mono">Embedded systems · C#/.NET · STM32F7 / dsPIC33E · UDP · VoIP</div>
-        <h3>Field firmware update for IP intercom nodes</h3>
-        <p>Made remote firmware updates possible for VoIP intercom nodes in secure facilities, where devices cannot be reached by hand and site staff update them over the live network. I extended the Windows maintenance tool with network firmware update, per-input event reporting and codec selection, designing each change against the node firmware and hardware on two processor families.</p>
+        <article class="card proj">
+        <div class="mono">Embedded systems · C# / .NET · Firmware update · UDP</div>
+        <h3>Field firmware update for networked devices</h3>
+        <p>Extended a Windows maintenance tool for networked embedded devices, so that site staff can update firmware and configure devices over the network instead of visiting each one. I designed every change against the device firmware and hardware it drives.</p>
         <ul>
-          <li>One tool now updates four device variants on two processor families, node by node, and reports exactly which nodes failed, so site staff know what still runs old firmware.</li>
-          <li>Proved the update cannot brick a node: cut power and pulled the Ethernet link mid-transfer on both hardware families, and every node fell back to its working image through the dual-bank flash fail-safe.</li>
-          <li>Studied the node hardware from its schematics before changing any software: a Cortex-M7 controller behind an on-board Ethernet switch, audio codec ICs on I2S and I2C, bridge-tied-load speaker amplifiers and six field inputs with configurable trigger level and debounce time.</li>
-          <li>Mapped the node firmware's command path end to end: LwIP UDP callbacks feeding a receive ring buffer, a command dispatcher, a retrying transmit queue and settings held as C structures in internal flash and read back after every write.</li>
-            <li>Traced both update paths through the node firmware, an in-application bank write with XOR checksum validation on the dsPIC33E and a boot-loader handover on the STM32F7 and used that analysis to replace the tool's built-in download with the proven production loader.</li>
-          <li>Added features to a fixed length UDP protocol without a single new command: the codec as an RTP payload type in a spare data word (G.711 at 8 kHz or G.722 at 16 kHz) and six input reporting flags in an existing byte, kept backward compatible with nodes already installed.</li>
-          <li>Root-caused three long-standing configuration bugs from packet captures and firmware source, including a MAC address command that used the read sub-command instead of the write sub-command, so nodes acknowledged and changed nothing. Verified every fix by power-cycling the node and reading the setting back from flash.</li>
-          <li>Diagnosed poor field audio as a codec and sample-rate mismatch and proposed and built the codec selection that fixed it.</li>
-          <li>Wrote the illustrated update manual for site staff and added per-variant file checks in front of the firmware's own hardware-version interlock.</li>
+          <li>Added network firmware update for several device variants on two processor families, reporting exactly which devices failed so none is left on old firmware unnoticed.</li>
+          <li>Studied the device firmware on both processor families to choose the update method and reused the proven production loader instead of maintaining a second one.</li>
+          <li>Proved that an interrupted update cannot leave a device unusable, by cutting power and pulling the network cable mid-transfer on every hardware type.</li>
+          <li>Extended an existing device protocol with new settings without adding commands, keeping it backward compatible with devices already installed and agreed the changes with the firmware developer.</li>
+          <li>Root-caused configuration bugs from packet captures and the device firmware and verified each fix on the device across a power cycle.</li>
+          <li>Wrote the illustrated update manual for site staff.</li>
         </ul>
-        <div class="tags"><span>C#</span><span>Embedded</span><span>dsPIC33</span><span>STM32</span><span>LwIP</span><span>UDP protocol</span><span>Boot loader</span><span>Dual-bank flash</span><span>VoIP / RTP</span><span>Wireshark</span></div>
-      </article>
-
-    <article class="card proj">
-        <div class="mono">Hardware · Fault analysis · STM32F4 / STM32F7 · Ethernet PHY · Production test</div>
-        <h3>Ethernet failure investigation and production quality</h3>
-        <p>Traced a network failure across multiple access controllers to counterfeit Ethernet switch ICs, specified a released design change to the lock-drive outputs and took over fault-finding, test and release of two embedded products, an access controller and a VoIP intercom node, both built for secure facilities where a faulty unit is a safety risk.</p>
-        <ul>
-          <li>Isolated the fault from multiple units that had dropped off the network, some only after weeks in service: they still answered over Bluetooth, which runs on an RS-232 serial path independent of Ethernet, proving the controller, firmware and supply were healthy and confining the search to the Ethernet path.</li>
-          <li>Compared failing boards circuit by circuit against a known-good earlier build, eliminating every cause that mimics a dead PHY: 3.3 V and 1.8 V rails after the ferrite-bead filters, the 25 MHz crystal and MII clocks, reset release and strap-pin levels, the ISET bias resistor, the MDC/MDIO management bus, and the magnetics, terminations and isolation capacitors.</li>
-          <li>With everything around it correct, the three-port switch IC itself ran hot on the network, pointing to excess current inside the device. The parts carried different markings and a lower temperature grade than the specified industrial part: counterfeit, confirmed by the supplier. Escalated to procurement and management; after a further supplier change the failures stopped.</li>
-          <li>Reworked boards myself, replacing the 48-pin LQFP device by hot-air rework with pin-by-pin inspection and a full rail, clock and dual-port link re-test, then trained the workshop on the method and inspected their rework of the rest.</li>
-          <li>Specified a released design change when a client's higher-current electromagnetic lock would not hold reliably, with the gate drive clamped at 3.6 V, a 4.7 kΩ gate resistor left the low-side MOSFET only partly enhanced. Changed it to 0 Ω on all six lock-drive channels, kept the gate clamp and current limit in place, and had the BOM and schematic revised for production.</li>
-          <li>Ended a two-week production stoppage on the test jig, where two in five units failed at random and the team was working overtime retesting until units passed: found an intermittent partial short, loose connectors and wiring that no longer matched the drawing. Replaced the faulty board, rewired and labelled the jig to its diagram, and swapped fatigue-prone pogo pins for plug-in connectors. False failures dropped to zero, exposing the real soldering defects behind the noise.</li>
-          <li>Repaired returned units at component level from the schematics, tracing surge damage through PTC fuses, varistors, TVS diodes and buck regulators, opto-isolated MOSFET lock drivers and Class-AB audio stages, and confirming a dead microcontroller by commanding its GPIO and probing the pins.</li>
-          <li>Held sign-out authority for both products as QA: every unit leaving the workshop needed my release and I rejected units that would have been unreliable or unsafe on site, regardless of delivery pressure.</li>
-        </ul>
-        <div class="tags"><span>Root-cause analysis</span><span>Ethernet PHY</span><span>Counterfeit detection</span><span>MOSFET drive design</span><span>SMD rework</span><span>Oscilloscope</span><span>Test jig</span><span>Quality assurance</span></div>
+        <div class="tags"><span>C#</span><span>.NET</span><span>Embedded</span><span>Firmware update</span><span>UDP</span><span>Wireshark</span></div>
       </article>
         
+    <article class="card proj">
+        <div class="mono">Hardware · Fault analysis · Ethernet · Production test · QA</div>
+        <h3>Ethernet failure investigation and production quality</h3>
+        <p>Led the investigation of a batch failure across hundreds of networked embedded controllers, made a design change to a released product, and took over fault-finding, test and release of two embedded products in the security sector.</p>
+        <ul>
+          <li>Traced a network failure affecting 300+ units to counterfeit components, by isolating the fault to one subsystem and then eliminating every other cause by measurement against a known-good board.</li>
+          <li>Reported the finding to procurement and management, reworked the first batch of boards myself by fine-pitch hot-air rework, then trained the workshop on the method and inspected their work.</li>
+          <li>Diagnosed an output stage that could not drive a customer's new load, and specified a component change that went into the bill of materials and the schematic for all future production.</li>
+          <li>Ended a production stoppage caused by unreliable test equipment: found intermittent wiring and contact faults, rebuilt the jig to its documentation and replaced worn contacts. False failures dropped to zero, revealing the real defects they had been hiding.</li>
+          <li>Repaired multiple returned units at component level from the schematics, covering power and protection circuits, isolated outputs, audio stages and microcontrollers.</li>
+          <li>Held sign-out authority as QA: every unit leaving the workshop needed my release.</li>
+        </ul>
+        <div class="tags"><span>Root-cause analysis</span><span>Counterfeit detection</span><span>Hardware design change</span><span>SMD rework</span><span>Oscilloscope</span><span>Test equipment</span><span>Quality assurance</span></div>
+      </article>
+
+        <article class="card proj">
+        <div class="mono">Embedded firmware · C · STM32 · FreeRTOS · LwIP · Fieldbus</div>
+        <h3>Door controller firmware</h3>
+        <p>Sole firmware engineer for a networked access-control door controller, which is commanded at the same time by an industrial control system, PC software, card readers and a mobile app. I owned new features, field fault investigation and releases.</p>
+        <ul>
+          <li>Worked on a multi-task FreeRTOS design on an STM32 Cortex-M4, with interrupt-driven peripherals and state machines.</li>
+          <li>Added a new door type end to end, from requirements to on-site release, without a hardware change.</li>
+          <li>Recreated the customer's industrial network on the bench and made it a pass/fail gate for every release.</li>
+          <li>Reproduced and fixed long-standing intermittent field faults by building test rigs that triggered them on demand, including a race condition between concurrent inputs.</li>
+          <li>Replaced fragile flag-based sequencing with timer-driven logic that always recovers and added safe fallbacks for invalid stored settings.</li>
+          <li>Debugged on target over SWD with breakpoints and live variable watch and verified fieldbus traffic with a CAN analyser.</li>
+        </ul>
+        <div class="tags"><span>C</span><span>STM32</span><span>FreeRTOS</span><span>LwIP</span><span>CAN / DeviceNet</span><span>Wiegand</span><span>SWD debugging</span></div>
+      </article>
 
     </div>
     <p class="note">These are commercial projects, so source code and design files are not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
