@@ -62,7 +62,23 @@
         </ul>
         <div class="tags"><span>C</span><span>STM32</span><span>FreeRTOS</span><span>LwIP</span><span>CAN / DeviceNet</span><span>Wiegand</span><span>SWD debugging</span></div>
       </article>
-
+        
+    <article class="card proj">
+        <div class="mono">Embedded systems · C# / .NET · MySQL · UDP / TCP</div>
+        <h3>Multi-user control and alarm software for networked devices</h3>
+        <p>Turned a single-user Windows tool for networked embedded controllers into a server and client system for several control-room operators. I also extended a service that forwards device events to an alarm monitoring platform. I designed every change around the controllers' protocol and firmware behaviour.</p>
+        <ul>
+          <li>Built one application that runs as server, operator client or on-site technician tool. Every instance talks to the controllers directly over UDP, so operating a device never depends on the server being up.</li>
+          <li>Kept the software usable when the database is offline by falling back to a local device list, and showed server health to operators through a database heartbeat.</li>
+          <li>Moved device event logging onto a background worker thread, so database delays never block the interface or incoming device traffic.</li>
+          <li>Added role-based access control with encrypted credentials and produced dated PDF incident reports from the event log.</li>
+          <li>Added offline detection and per-device, per-event rate limiting to the alarm link, so one faulty device cannot flood the control room or hide real alarms.</li>
+          <li>Debugged device traffic with packet captures and UDP/TCP terminals, verified every release on a hardware test rig and commissioned the alarm link on site with the operators' security team using a TCP test harness I built.</li>
+          <li>Automated the manual hardware test procedure as a guided test page, cutting my own test time per unit from about 20 minutes to under 5 minutes.</li>
+        </ul>
+        <div class="tags"><span>C#</span><span>.NET</span><span>WinForms</span><span>Embedded</span><span>MySQL</span><span>UDP / TCP</span><span>Multithreading</span><span>Access control</span><span>Visual Studio 2022</span><span>MySQL Workbench</span><span>Git / GitHub</span><span>Wireshark</span><span>Hercules</span><span>Tera Term</span><span>PuTTY</span><span>Advanced IP Scanner</span><span>log4net</span><span>NuGet</span></div>
+      </article>
+        
     </div>
     <p class="note">These are commercial projects, so source code and design files are not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
