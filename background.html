@@ -34,6 +34,19 @@
 <section class="bg-section"><div class="wrap"><div class="bg">
 
   <div class="block">
+    <h2>Summary</h2>
+    <p>Electrical and Electronic engineer experienced in networked security and access-control products. I work across the whole product: circuit-level fault finding and board changes, real-time firmware, the PC software that configures, monitors and updates devices in the field, and the systems that support manufacturing. More recently I have owned projects end to end, from requirements and stakeholder engagement through risk control to the decision to go live.</p>
+    <ul class="plain" style="margin-top:16px">
+      <li><strong>Embedded firmware.</strong> C on STM32 under FreeRTOS: interrupts, timers, flash storage, network stacks and safe dual-bank firmware update.</li>
+      <li><strong>Hardware.</strong> Component-level root-cause analysis, MOSFET drive and protection circuits, and design changes carried into production.</li>
+      <li><strong>Device networking.</strong> UDP and TCP protocol design, Ethernet PHY and switch interfaces, CAN, Wiegand and alarm reporting formats, debugged at packet level.</li>
+      <li><strong>Engineering software.</strong> Multithreaded C#/.NET client–server systems over MySQL, with role-based access and fallback options.</li>
+      <li><strong>Project ownership.</strong> Replaced a production-critical ordering process with a multi-user system integrated with the company ERP, managing stakeholders, risk, change control and cutover.</li>
+      <li><strong>Test and security.</strong> Automated production testing, test harnesses and on-site commissioning, backed by formal cyber-security training.</li>
+    </ul>
+  </div>
+
+  <div class="block">
     <h2>Certifications and courses</h2>
     <div class="entry">
       <div class="name">Google Cybersecurity Professional Certificate</div>
@@ -60,11 +73,14 @@
   <div class="block">
     <h2>How I work</h2>
     <ul class="plain">
-      <li><strong>Evidence before replacement.</strong> I form a hypothesis from the circuit or code, then prove it by measurement.</li>
-      <li><strong>Reproduce it first.</strong> If a fault only happens on site, I build the rig that makes it happen on the bench.</li>
-      <li><strong>Whole-system view.</strong> A fault may sit in the hardware, firmware, app or test equipment. I check all of them.</li>
-      <li><strong>Test the failure, not just the success.</strong> Blah blah.</li>
-      <li><strong>Leave a trail.</strong> Change control, test records and user documentation are part of the job.</li>
+      <li><strong>Hypothesis-driven fault isolation.</strong> I work from the schematic, firmware and protocol to a testable hypothesis, then confirm it by measurement (oscilloscope, current and voltage measurement, packet capture) before any component or code is changed.</li>
+      <li><strong>Reproduce under controlled conditions.</strong> Field faults are recreated on the bench with test fixtures, protocol test harnesses and instrumented builds, so the root cause can be isolated and the fix verified against the same stimulus.</li>
+      <li><strong>System-level root-cause analysis.</strong> A symptom may originate in the hardware, the firmware, the host software, the network or the test equipment itself, so I isolate the fault domain before deciding on corrective action.</li>
+      <li><strong>Fault injection, not just functional testing.</strong> I verify behaviour under power loss, link loss and malformed or repeated traffic, for example interrupting firmware updates to prove dual-bank fallback recovers the device.</li>
+      <li><strong>Design for degraded operation.</strong> Watchdog supervision, acknowledged retransmission, rate limiting and fallback modes keep a system available and safe when a dependency fails.</li>
+      <li><strong>Verification against a reference.</strong> Acceptance criteria are defined before release, and replacement systems run in parallel against a trusted reference until results match.</li>
+      <li><strong>Risk-based prioritisation.</strong> Defects are triaged by operational impact. Anything that stops production or ordering is resolved first.</li>
+      <li><strong>Configuration management.</strong> Version control, staged changes on a test copy before release, controlled database schema changes, traceable releases and user documentation.</li>
     </ul>
   </div>
 
@@ -74,6 +90,8 @@
       <tr><td>Embedded firmware</td><td>C on STM32F4 and STM32F7 (Cortex-M4/M7), FreeRTOS, LwIP, UDP protocol design, DeviceNet, Wiegand, Bluetooth Low Energy, boot loaders and dual-bank firmware update, flash-backed settings</td></tr>
       <tr><td>Hardware</td><td>Altium Designer, schematic and PCB layout, Ethernet switch and PHY interfaces (MII, MDIO), opto-isolated MOSFET outputs, buck, boost and LDO power conversion, surge and ESD protection to IEC 61000-4, I2S and I2C audio codecs</td></tr>
       <tr><td>Software</td><td>C#/.NET (WinForms, WPF), multithreading and concurrent queues, MySQL schema design, client–server architecture, role-based access control, PDF reporting, Android, Git</td></tr>
+      <tr><td>Manufacturing systems</td><td>Material requirements planning, BOM and engineering change control, component obsolescence, contract-manufacturer BOM audit, Excel VBA</td></tr>
+      <tr><td>Project management</td><td>Requirements elicitation, stakeholder management, risk registers, staged delivery, acceptance testing, cutover planning</td></tr>
       <tr><td>Test and QA</td><td>Production test design, test jig repair and redesign, root-cause analysis, counterfeit component detection, release sign-off, change control</td></tr>
       <tr><td>Security</td><td>SOC analysis: log analysis, incident handling, threat analysis; least-privilege access design</td></tr>
       <tr><td>Bench and tools</td><td>Oscilloscope and multimeter fault-finding, fine-pitch SMD and hot-air rework, Wireshark packet analysis, ST-LINK and SWD programming</td></tr>
