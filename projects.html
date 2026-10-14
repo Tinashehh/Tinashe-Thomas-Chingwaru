@@ -79,6 +79,21 @@
         <div class="tags"><span>C#</span><span>.NET</span><span>WinForms</span><span>Embedded</span><span>MySQL</span><span>UDP / TCP</span><span>Multithreading</span><span>Access control</span><span>Visual Studio 2022</span><span>MySQL Workbench</span><span>Git / GitHub</span><span>Wireshark</span><span>Hercules</span><span>Tera Term</span><span>PuTTY</span><span>Advanced IP Scanner</span><span>log4net</span><span>NuGet</span></div>
       </article>
         
+        <article class="card proj">
+        <div class="mono">Project ownership · Manufacturing systems · Dolibarr ERP · C# / .NET · MySQL</div>
+        <h3>Leading the replacement of a production-critical ordering process</h3>
+        <p>Took ownership of the move from a single-user spreadsheet, which every component order for printed circuit board assembly production depended on, to two multi-user applications integrated with the company's Enterprise Resource Planning. With no specification, plan or team handed to me, I defined the scope, engaged the people affected, managed the risk to a live business process and made the decision to switch over.</p>
+        <ul>
+          <li>Set the objective and the acceptance criterion: no live order would go through the new system until its results matched the trusted spreadsheet's.</li>
+          <li>Brought together the needs of procurement, engineering, the workshop, the assembly manager, the office and the outside assembly house, each with its own requirements and its own level of access.</li>
+          <li>Ran the work as staged releases, one functional area at a time. I kept one fault and change list for all users and prioritised it by impact on production, so anything that stopped ordering always came first.</li>
+          <li>Kept a risk register with a control for each risk: a side-by-side run against the spreadsheet, a staging copy of the database, a fallback to the old process until acceptance, least-privilege access, and approval before writing to the ERP.</li>
+          <li>Extended the shared database without breaking other tools that depend on it, and kept ordering and production tracking running through the company's DataBase upgrades.</li>
+          <li>Rebuilt and verified the material requirements calculation, corrected the stock model and traced and fixed my own errors before they reached a live order.</li>
+          <li>Led acceptance testing with the main user and made the cutover decision. The spreadsheet is retired, ordering is no longer limited to one person, the workshop and engineers have live visibility of jobs and stock, and BOM capture has dropped from about 7 to about 2 minutes by the procurement manager's estimate.</li>
+        </ul>
+        <div class="tags"><span>Project management</span><span>Stakeholder management</span><span>Risk management</span><span>Change control</span><span>Requirements</span><span>Manufacturing</span><span>Dolibarr ERP</span><span>C#</span><span>.NET</span><span>MySQL</span><span>SQL</span><span>VBA</span><span>Git</span></div>
+      </article>
     </div>
     <p class="note">These are commercial projects, so source code and design files are not public, and company, client, site and product names are left out. I'm happy to talk through the engineering.</p>
   </div></section>
